@@ -4,37 +4,65 @@ import asyncio
 from dotenv import load_dotenv
 import os
 
+# 1. Configurações Iniciais
 load_dotenv()
-
 TOKEN = os.getenv('BOT_TOKEN')
 
 intents = discord.Intents.default()
-intents.message_content = True  # Enable message content intent
+intents.message_content = True 
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+# 2. Criamos uma classe para o Bot para gerenciar o setup adequadamente
+class MyBot(commands.Bot):
+    def __init__(self):
+        super().__init__(
+            command_prefix='!',
+            intents=intents,
+            help_command=None # Opcional: remove o comando help padrão
+        )
+
+    # O setup_hook é o melhor lugar para carregar Cogs e sincronizar comandos
+    async def setup_hook(self):
+        extensions = ['cogs.commands', 'cogs.utilities']
+        
+        meu_servidor = discord.Object(id=1467963749498355876) 
+    
+    # Copia os comandos globais para este servidor específico
+        self.tree.copy_global_to(guild=meu_servidor)
+        await self.tree.sync(guild=meu_servidor)
+
+        for extension in extensions:
+            try:
+                await self.load_extension(extension)
+                print(f'✅ Extensão {extension} carregada.')
+            except Exception as e:
+                print(f'❌ Falha ao carregar {extension}: {e}')
+
+        # Sincronização dos Slash Commands
+        print("Sincronizando comandos com o Discord...")
+        try:
+            # Sincronização Global (pode levar alguns minutos para aparecer)
+            synced = await self.tree.sync()
+            print(f"🚀 Sincronizados {len(synced)} comandos de barra globalmente!")
+        except Exception as e:
+            print(f"❌ Erro ao sincronizar: {e}")
+
+# 3. Instanciamos o Bot
+bot = MyBot()
 
 @bot.event
 async def on_ready():
-    print(f'Logado como {bot.user}')
-    try:
-        # Isso envia seus comandos de barra para o Discord
-        synced = await bot.tree.sync()
-        print(f"Sincronizados {len(synced)} comandos de barra!")
-    except Exception as e:
-        print(f"Erro ao sincronizar comandos: {e}")
+    print(f'---')
+    print(f'Logado como: {bot.user.name}')
+    print(f'ID: {bot.user.id}')
+    print(f'---')
 
-async def load_cogs():
-    extensions = ['cogs.commands', 'cogs.utilities']
-    for extension in extensions:
-        try:
-            await bot.load_extension(extension)
-            print(f'Extensão {extension} carregada com sucesso!')
-        except Exception as e: 
-            print(f'Falha ao carregar a extensão {extension}: {e}.')
-            
+# 4. Execução principal
 async def main():
     async with bot:
-        await load_cogs()
         await bot.start(TOKEN)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Bot desligado.")
