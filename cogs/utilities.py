@@ -80,7 +80,7 @@ class UtilityCommands(commands.Cog):
             
     @app_commands.command(name='unrole', description='Remove o cargo de um membro')
     @app_commands.describe(cargo='Nome do cargo', membro='Membro que ira ter o cargo removido')
-    @app_commands.check.has.permissions(manage_roles=True)
+    @app_commands.checks.has_permissions(manage_roles=True)
     async def unrole(self, interaction: discord.Interaction, cargo: str, membro: discord.Member):
         try:
             role = discord.utils.get(interaction.guild.roles, name=cargo)
