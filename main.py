@@ -55,6 +55,24 @@ async def on_ready():
     print(f'Logado como: {bot.user.name}')
     print(f'ID: {bot.user.id}')
     print(f'---')
+    
+@bot.event
+async def on_member_join(member):
+    role_name="Membro"
+    
+    role = discord.utils.get(member.guild.roles, name=role_name)
+    if role:
+        try:
+            await member.add_roles(role)
+            print(f"Cargo {role_name} aplicado a {member.name}")
+        except discord.Forbidden:
+            print("Erro: O bot não tem permissão para dar esse cargo (verifique a hierarquia).")
+    else:
+        print(f"Cargo {role_name} não encontrado no servidor.")
+
+@bot.event
+async def on_member_join(member, ctx):
+    await ctx.send(f"Bem-vindo, {member.mention}!")
 
 # 4. Execução principal
 async def main():
