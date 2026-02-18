@@ -9,6 +9,7 @@ load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
 
 intents = discord.Intents.default()
+intents.members = True
 intents.message_content = True 
 
 # 2. Criamos uma classe para o Bot para gerenciar o setup adequadamente
